@@ -6,13 +6,13 @@ A responsive weather app built with React that displays real-time weather data u
 
 ## 🚀 Live Demo
 
-👉 https://your-app.vercel.app
+👉 [https://your-app.vercel.app](https://weather-app-nine-mu-48.vercel.app/)
 
 ---
 
 ## 📸 Screenshot
 
-![App Screenshot](./Screenshot2026-03-18154801.png)
+![App Screenshot](./Screenshot 2026-03-18 154801.png)
 
 ---
 
