@@ -1,6 +1,8 @@
 body {
   font-family: appFont;
+
   background-color: #0048ca;
+  overflow: hidden;
 }
 
 @font-face {

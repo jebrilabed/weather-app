@@ -7,11 +7,11 @@ import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import "dayjs/locale/ar";
 import Button from "@mui/material/Button";
+import { getWeather } from "../api/weather.js";
 
 dayjs.locale("ar");
 
@@ -36,17 +36,15 @@ const theme = createTheme({
 });
 
 function App() {
-  const [weather, setWeather] = useState(null);
+  // const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
+  const [weather, setWeather] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=31.5017&lon=34.4668&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`,
-      )
-      .then((response) => {
-        setWeather(response.data);
+    getWeather()
+      .then((data) => {
+        setWeather(data);
         setLoading(false);
       })
       .catch((error) => {
@@ -54,6 +52,22 @@ function App() {
         setLoading(false);
       });
   }, []);
+  // }, []);
+  console.log("Weather data:", weather);
+  // useEffect(() => {
+  //   axios
+  //     .get(
+  //       `https://api.openweathermap.org/data/2.5/weather?lat=31.5017&lon=34.4668&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`,
+  //     )
+  //     .then((response) => {
+  //       setWeather(response.data);
+  //       setLoading(false);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching weather data:", error);
+  //       setLoading(false);
+  //     });
+  // }, []);
   return (
     <ThemeProvider theme={theme}>
       <Container
@@ -103,7 +117,7 @@ function App() {
                 sx={{
                   textAlign: "center",
                   marginBottom: { xs: "-10px", md: "-30px" },
-                  fontSize: { xs: "1rem", sm: "1.2rem", md: "1.5rem" },
+                  fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.4rem" },
                 }}
               >
                 {i18n.language === "ar"
@@ -156,9 +170,9 @@ function App() {
                       : weather
                         ? i18n.language === "ar"
                           ? toArabicNumerals(
-                              Math.round(weather.main.temp - 273.15).toString(),
+                              Math.round(weather.main.temp).toString(),
                             )
-                          : Math.round(weather.main.temp - 273.15).toString()
+                          : Math.round(weather.main.temp).toString()
                         : ""}
                   </Typography>
                   <img
@@ -198,13 +212,9 @@ function App() {
                         ? `${t("min")}: ${
                             i18n.language === "ar"
                               ? toArabicNumerals(
-                                  Math.round(
-                                    weather.main.temp_min - 273.15,
-                                  ).toString(),
+                                  Math.round(weather.main.temp_min).toString(),
                                 )
-                              : Math.round(
-                                  weather.main.temp_min - 273.15,
-                                ).toString()
+                              : Math.round(weather.main.temp_min).toString()
                           }`
                         : ""}
                   </Typography>
@@ -216,13 +226,9 @@ function App() {
                         ? `${t("max")}: ${
                             i18n.language === "ar"
                               ? toArabicNumerals(
-                                  Math.round(
-                                    weather.main.temp_max - 273.15,
-                                  ).toString(),
+                                  Math.round(weather.main.temp_max).toString(),
                                 )
-                              : Math.round(
-                                  weather.main.temp_max - 273.15,
-                                ).toString()
+                              : Math.round(weather.main.temp_max).toString()
                           }`
                         : ""}
                   </Typography>
