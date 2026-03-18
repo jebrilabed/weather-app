@@ -1,0 +1,18 @@
+{
+  "welcome": "مرحبًا بك في تطبيقي",
+  "description": "هذا مثال بسيط على i18next",
+  "changeLanguage": "تغيير اللغة",
+  "min": "الصغرى",
+  "max": "الكبرى",
+  "Gaza": "غزة",
+  "clear sky": "سماء صافية",
+  "few clouds": "غيوم قليلة",
+  "scattered clouds": "غيوم متناثرة",
+  "broken clouds": "غيوم متكسرة",
+  "mist": "ضباب",
+  "shower rain": "أمطار رذاذ",
+  "rain": "أمطار",
+  "thunderstorm": "عاصفة رعدية",
+  "snow": "ثلج",
+  "Loading...": "جارٍ التحميل..."
+}
