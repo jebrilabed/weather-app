@@ -12,7 +12,7 @@ A responsive weather app built with React that displays real-time weather data u
 
 ## 📸 Screenshot
 
-![App Screenshot](./Screenshot 2026-03-18 154801.png)
+![App Screenshot](./screenshot.png)
 
 ---
 
