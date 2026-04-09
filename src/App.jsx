@@ -1,5 +1,6 @@
 import "./App.css";
 import CloudIcon from "@mui/icons-material/Cloud";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { Container } from "@mui/material";
 import { Card } from "@mui/material";
 import CardContent from "@mui/material/CardContent";
@@ -9,11 +10,21 @@ import { ThemeProvider } from "@mui/material/styles";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import "dayjs/locale/ar";
+dayjs.extend(utc);
 import Button from "@mui/material/Button";
-import { getWeather } from "../api/weather.js";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
+import { getWeather, getWeatherByCoords } from "../api/weather.js";
+import CITIES from "./cities.js";
 
-dayjs.locale("ar");
+
+
+
 
 // Function to convert Western digits to Arabic numerals
 const toArabicNumerals = (str) => {
@@ -36,13 +47,49 @@ const theme = createTheme({
 });
 
 function App() {
-  // const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const { t, i18n } = useTranslation();
   const [weather, setWeather] = useState(null);
+  const [selectedCity, setSelectedCity] = useState("Gaza");
+  const [inputValue, setInputValue] = useState("Gaza");
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
+
+  const searchCity = (city) => {
+    const trimmed = city.trim();
+    if (trimmed) setSelectedCity(trimmed);
+  };
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError(i18n.language === "ar" ? "المتصفح لا يدعم تحديد الموقع" : "Geolocation not supported");
+      return;
+    }
+    setLocating(true);
+    setLocationError("");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        getWeatherByCoords(pos.coords.latitude, pos.coords.longitude)
+          .then((data) => {
+            setWeather(data);
+            setSelectedCity(data.name);
+            setLocating(false);
+          })
+          .catch(() => {
+            setLocationError(i18n.language === "ar" ? "تعذّر جلب الطقس" : "Failed to get weather");
+            setLocating(false);
+          });
+      },
+      () => {
+        setLocationError(i18n.language === "ar" ? "تم رفض الوصول إلى الموقع" : "Location access denied");
+        setLocating(false);
+      }
+    );
+  };
 
   useEffect(() => {
-    getWeather()
+    setLoading(true);
+    getWeather(selectedCity)
       .then((data) => {
         setWeather(data);
         setLoading(false);
@@ -51,37 +98,94 @@ function App() {
         console.error("Error fetching weather data:", error);
         setLoading(false);
       });
-  }, []);
-  // }, []);
-  console.log("Weather data:", weather);
-  // useEffect(() => {
-  //   axios
-  //     .get(
-  //       `https://api.openweathermap.org/data/2.5/weather?lat=31.5017&lon=34.4668&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`,
-  //     )
-  //     .then((response) => {
-  //       setWeather(response.data);
-  //       setLoading(false);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching weather data:", error);
-  //       setLoading(false);
-  //     });
-  // }, []);
+  }, [selectedCity]);
+
   return (
     <ThemeProvider theme={theme}>
       <Container
         maxWidth="sm"
         sx={{
           direction: i18n.language === "ar" ? "rtl" : "ltr",
-          height: "100vh",
+          minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
           padding: { xs: 2, sm: 3 },
+          gap: 2,
         }}
       >
+        {/* City Search + Location Button */}
+        <div style={{ display: "flex", gap: "8px", width: "100%", maxWidth: 400, alignItems: "center" }}>
+          <Autocomplete
+            freeSolo
+            options={CITIES}
+            value={selectedCity}
+            inputValue={inputValue}
+            onInputChange={(_, val) => setInputValue(val)}
+            onChange={(_, newValue) => { if (newValue) { setSelectedCity(newValue); setInputValue(newValue); } }}
+            disableClearable
+            sx={{ flex: 1 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={i18n.language === "ar" ? "ابحث عن أي مدينة" : "Search any city"}
+                variant="outlined"
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); searchCity(inputValue); } }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    color: "#ffffff",
+                    borderRadius: "10px",
+                    backgroundColor: "rgba(255,255,255,0.12)",
+                    "& fieldset": { borderColor: "rgba(255,255,255,0.4)" },
+                    "&:hover fieldset": { borderColor: "#ffffff" },
+                    "&.Mui-focused fieldset": { borderColor: "#ffffff" },
+                  },
+                  "& .MuiInputLabel-root": { color: "rgba(255,255,255,0.7)" },
+                  "& .MuiInputLabel-root.Mui-focused": { color: "#ffffff" },
+                  "& .MuiSvgIcon-root": { color: "#ffffff" },
+                  "& input": { color: "#ffffff" },
+                }}
+              />
+            )}
+            componentsProps={{
+              paper: {
+                sx: {
+                  bgcolor: "#0a3f9e",
+                  color: "#ffffff",
+                  borderRadius: "10px",
+                  "& .MuiAutocomplete-option": { color: "#ffffff" },
+                  "& .MuiAutocomplete-option:hover": { backgroundColor: "rgba(255,255,255,0.15)" },
+                  "& .MuiAutocomplete-option[aria-selected='true']": { backgroundColor: "rgba(255,255,255,0.25) !important" },
+                },
+              },
+            }}
+          />
+          <Tooltip
+            title={locationError || (i18n.language === "ar" ? "تحديد موقعي" : "Detect my location")}
+            arrow
+          >
+            <span>
+              <IconButton
+                onClick={detectLocation}
+                disabled={locating}
+                sx={{
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  border: "1px solid rgba(255,255,255,0.4)",
+                  borderRadius: "10px",
+                  color: locationError ? "#ff6b6b" : "#ffffff",
+                  width: 56,
+                  height: 56,
+                  "&:hover": { backgroundColor: "rgba(255,255,255,0.22)", borderColor: "#ffffff" },
+                }}
+              >
+                {locating
+                  ? <CircularProgress size={22} sx={{ color: "#ffffff" }} />
+                  : <MyLocationIcon />}
+              </IconButton>
+            </span>
+          </Tooltip>
+        </div>
         <Card
           sx={{
             padding: { xs: 1, sm: 2 },
@@ -103,13 +207,17 @@ function App() {
             >
               <Typography
                 sx={{
-                  fontSize: { xs: 40, sm: 50, md: 70 },
+                  fontSize: { xs: 48, sm: 58, md: 68 },
                   fontWeight: "500",
                   padding: "0",
                   textAlign: "end",
                 }}
               >
-                {t(weather ? weather.name : "Loading...")}
+                {loading || !weather ? (
+                  <div className="skeleton" style={{ width: "140px", height: "52px" }} />
+                ) : (
+                  t(weather.name)
+                )}
               </Typography>
               <Typography
                 variant="h5"
@@ -120,11 +228,15 @@ function App() {
                   fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.4rem" },
                 }}
               >
-                {i18n.language === "ar"
-                  ? toArabicNumerals(
-                      dayjs().locale("ar").format("dddd, D MMMM YYYY HH:mm"),
-                    )
-                  : dayjs().locale("en").format("dddd, D MMMM YYYY HH:mm")}
+                {loading || !weather ? (
+                  <div className="skeleton" style={{ width: "200px", height: "22px", marginTop: "4px" }} />
+                ) : i18n.language === "ar" ? (
+                  toArabicNumerals(
+                    dayjs.utc().add(weather.timezone, "second").locale("ar").format("dddd, D MMMM HH:mm")
+                  )
+                ) : (
+                  dayjs.utc().add(weather.timezone, "second").locale("en").format("dddd, D MMMM HH:mm")
+                )}
               </Typography>
             </div>
             <div
@@ -165,20 +277,20 @@ function App() {
                       padding: "0",
                     }}
                   >
-                    {loading
-                      ? t("Loading...")
-                      : weather
-                        ? i18n.language === "ar"
-                          ? toArabicNumerals(
-                              Math.round(weather.main.temp).toString(),
-                            )
-                          : Math.round(weather.main.temp).toString()
-                        : ""}
+                    {loading || !weather ? (
+                      <div className="skeleton" style={{ width: "90px", height: "80px", borderRadius: "12px" }} />
+                    ) : i18n.language === "ar" ? (
+                      toArabicNumerals(Math.round(weather.main.temp).toString())
+                    ) : (
+                      Math.round(weather.main.temp).toString()
+                    )}
                   </Typography>
-                  <img
-                    src={`https://openweathermap.org/payload/api/media/file/${weather ? weather.weather[0].icon : ""}.png`}
-                    alt="Weather Icon"
-                  />
+                  {loading || !weather ? null : (
+                    <img
+                      src={`https://openweathermap.org/payload/api/media/file/${weather.weather[0].icon}.png`}
+                      alt="Weather Icon"
+                    />
+                  )}
                 </div>
                 <Typography
                   sx={{
@@ -187,12 +299,10 @@ function App() {
                     fontWeight: "400",
                   }}
                 >
-                  {t(
-                    loading
-                      ? "Loading..."
-                      : weather
-                        ? weather.weather[0].description
-                        : "",
+                  {loading || !weather ? (
+                    <div className="skeleton" style={{ width: "120px", height: "24px", margin: "4px auto" }} />
+                  ) : (
+                    t(weather.weather[0].description)
                   )}
                 </Typography>
                 <div
@@ -206,42 +316,31 @@ function App() {
                   }}
                 >
                   <Typography>
-                    {loading
-                      ? `${t("min")}: ${t("Loading...")}`
-                      : weather
-                        ? `${t("min")}: ${
-                            i18n.language === "ar"
-                              ? toArabicNumerals(
-                                  Math.round(weather.main.temp_min).toString(),
-                                )
-                              : Math.round(weather.main.temp_min).toString()
-                          }`
-                        : ""}
+                    {loading || !weather ? (
+                      <div className="skeleton" style={{ width: "70px", height: "18px" }} />
+                    ) : (
+                      `${t("min")}: ${i18n.language === "ar" ? toArabicNumerals(Math.round(weather.main.temp_min).toString()) : Math.round(weather.main.temp_min).toString()}`
+                    )}
                   </Typography>
-                  <Typography>|</Typography>
+                  {!loading && weather && <Typography>|</Typography>}
                   <Typography>
-                    {loading
-                      ? `${t("max")}: ${t("Loading...")}`
-                      : weather
-                        ? `${t("max")}: ${
-                            i18n.language === "ar"
-                              ? toArabicNumerals(
-                                  Math.round(weather.main.temp_max).toString(),
-                                )
-                              : Math.round(weather.main.temp_max).toString()
-                          }`
-                        : ""}
+                    {loading || !weather ? (
+                      <div className="skeleton" style={{ width: "70px", height: "18px" }} />
+                    ) : (
+                      `${t("max")}: ${i18n.language === "ar" ? toArabicNumerals(Math.round(weather.main.temp_max).toString()) : Math.round(weather.main.temp_max).toString()}`
+                    )}
                   </Typography>
                 </div>
               </div>
               <div
                 style={{
-                  width: { xs: "100%", sm: "50%" },
+                  width: "50%",
                   textAlign: "center",
                   color: "#ffffff",
                 }}
               >
                 <CloudIcon
+                  className={loading ? "loading-cloud" : ""}
                   sx={{
                     fontSize: { xs: 120, sm: 150, md: 180 },
                     marginTop: { xs: 5, sm: 4 },

@@ -1,8 +1,45 @@
 body {
   font-family: appFont;
-
   background-color: #0048ca;
   overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.08) 25%,
+      rgba(255, 255, 255, 0.22) 50%,
+      rgba(255, 255, 255, 0.08) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes pulse-cloud {
+
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.06);
+  }
+}
+
+.loading-cloud {
+  animation: pulse-cloud 1.6s ease-in-out infinite;
 }
 
 @font-face {
@@ -10,31 +47,37 @@ body {
   src: url("./assets/fonts/IBMPlexSansArabic-Thin.ttf") format("truetype");
   font-weight: 100;
 }
+
 @font-face {
   font-family: "appFont";
   src: url("./assets/fonts/IBMPlexSansArabic-ExtraLight.ttf") format("truetype");
   font-weight: 200;
 }
+
 @font-face {
   font-family: "appFont";
   src: url("./assets/fonts/IBMPlexSansArabic-Light.ttf") format("truetype");
   font-weight: 300;
 }
+
 @font-face {
   font-family: "appFont";
   src: url("./assets/fonts/IBMPlexSansArabic-Regular.ttf") format("truetype");
   font-weight: 400;
 }
+
 @font-face {
   font-family: "appFont";
   src: url("./assets/fonts/IBMPlexSansArabic-Medium.ttf") format("truetype");
   font-weight: 500;
 }
+
 @font-face {
   font-family: "appFont";
   src: url("./assets/fonts/IBMPlexSansArabic-SemiBold.ttf") format("truetype");
   font-weight: 700;
 }
+
 @font-face {
   font-family: "appFont";
   src: url("./assets/fonts/IBMPlexSansArabic-Bold.ttf") format("truetype");
