@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, Typography, CircularProgress } from "@mui/material";
+import { Card, CardContent, Typography, CircularProgress, Box } from "@mui/material";
 import CloudIcon from "@mui/icons-material/Cloud";
 import dayjs from "dayjs";
 
@@ -36,21 +36,26 @@ export default function WeatherCard({ weather, loading, darkMode, error }) {
                     </div>
                 ) : (
                     <>
-                        <div
-                            style={{
+                        <Box
+                            sx={{
                                 display: "flex",
-                                gap: "1rem",
-                                alignItems: "center",
+                                flexDirection: { xs: "column", sm: "row" },
+                                gap: { xs: 0, sm: "1rem" },
+                                alignItems: { xs: "flex-start", sm: "center" },
+                                justifyContent: "space-between",
                                 padding: { xs: "0 5px", sm: "0 10px" },
+                                mb: 1
                             }}
                         >
                             <Typography
                                 component="div"
                                 sx={{
-                                    fontSize: { xs: 48, sm: 58, md: 68 },
-                                    fontWeight: "500",
+                                    fontSize: { xs: 36, sm: 48, md: 60 },
+                                    fontWeight: "600",
                                     padding: "0",
-                                    textAlign: "end",
+                                    lineHeight: 1.1,
+                                    wordBreak: "break-word",
+                                    maxWidth: "100%"
                                 }}
                             >
                                 {loading || !weather ? (
@@ -63,13 +68,14 @@ export default function WeatherCard({ weather, loading, darkMode, error }) {
                                 variant="h5"
                                 component="div"
                                 sx={{
-                                    textAlign: "center",
-                                    marginBottom: { xs: "-10px", md: "-30px" },
-                                    fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.4rem" },
+                                    textAlign: { xs: "start", sm: "center" },
+                                    fontSize: { xs: "0.85rem", sm: "1.1rem", md: "1.3rem" },
+                                    opacity: 0.8,
+                                    mt: { xs: 0.5, sm: 0 }
                                 }}
                             >
                                 {loading || !weather ? (
-                                    <div className="skeleton" style={{ width: "200px", height: "22px", marginTop: "4px" }} />
+                                    <div className="skeleton" style={{ width: "120px", height: "20px", marginTop: "4px" }} />
                                 ) : i18n.language === "ar" ? (
                                     toArabicNumerals(
                                         dayjs.utc().add(weather.timezone, "second").locale("ar").format("dddd, D MMMM HH:mm")
@@ -78,44 +84,47 @@ export default function WeatherCard({ weather, loading, darkMode, error }) {
                                     dayjs.utc().add(weather.timezone, "second").locale("en").format("dddd, D MMMM HH:mm")
                                 )}
                             </Typography>
-                        </div>
-                        <div
-                            style={{
-                                width: "104%",
-                                height: "1.6px",
+                        </Box>
+                        <Box
+                            sx={{
+                                width: "calc(100% + 32px)",
+                                height: "1.5px",
                                 background: dividerColor,
-                                margin: "-10px",
+                                margin: "0 -16px",
                                 transition: "background 0.3s ease",
+                                opacity: 0.6
                             }}
-                        ></div>
+                        ></Box>
 
-                        <div
-                            style={{
+                        <Box
+                            sx={{
                                 display: "flex",
+                                flexDirection: { xs: "column", sm: "row" },
                                 width: "100%",
                                 justifyContent: "space-around",
-                                padding: { xs: "5px", sm: "10px" },
+                                alignItems: "center",
+                                padding: { xs: "10px 5px", sm: "10px" },
                                 textAlign: "center",
+                                gap: { xs: 2, sm: 0 }
                             }}
                         >
-                            <div>
-                                <div
-                                    style={{
-                                        marginTop: 10,
+                            <Box sx={{ flex: 1 }}>
+                                <Box
+                                    sx={{
+                                        marginTop: { xs: 1, sm: 2 },
                                         display: "flex",
-                                        gap: 5,
+                                        gap: 1,
                                         textAlign: "center",
                                         justifyContent: "center",
                                         alignItems: "center",
                                         color: textColor,
-                                        height: { xs: "80px", sm: "110px" },
                                     }}
                                 >
                                     <Typography
                                         component="div"
                                         sx={{
-                                            fontSize: { xs: 60, sm: 80, md: 100 },
-                                            fontWeight: "500",
+                                            fontSize: { xs: 60, sm: 70, md: 90 },
+                                            fontWeight: "600",
                                             padding: "0",
                                         }}
                                     >
@@ -127,76 +136,84 @@ export default function WeatherCard({ weather, loading, darkMode, error }) {
                                             Math.round(weather.main.temp).toString()
                                         )}
                                     </Typography>
+                                    <span style={{ fontSize: "2rem", alignSelf: "flex-start", marginTop: "1rem" }}>°</span>
                                     {loading || !weather ? null : (
                                         <img
-                                            src={`https://openweathermap.org/payload/api/media/file/${weather.weather[0].icon}.png`}
+                                            src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
                                             alt="Weather Icon"
+                                            style={{ width: "100px", height: "100px" }}
                                         />
                                     )}
-                                </div>
+                                </Box>
                                 <Typography
                                     component="div"
                                     sx={{
-                                        marginTop: { xs: "-10px", sm: "-12px", md: "-15px" },
-                                        fontSize: { xs: 20, sm: 23, md: 25 },
+                                        marginTop: { xs: "-5px", sm: "-10px" },
+                                        fontSize: { xs: 20, sm: 22, md: 24 },
                                         fontWeight: "400",
+                                        textTransform: "capitalize"
                                     }}
                                 >
                                     {loading || !weather ? (
-                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                                        <Box style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
                                             <CircularProgress size={20} sx={{ color: textColor }} />
                                             <span>{i18n.language === "ar" ? "جاري التحميل..." : "Loading..."}</span>
-                                        </div>
+                                        </Box>
                                     ) : (
                                         t(weather.weather[0].description)
                                     )}
                                 </Typography>
-                                <div
-                                    style={{
+                                <Box
+                                    sx={{
                                         display: "flex",
                                         marginTop: "15px",
-                                        gap: { xs: 5, sm: 10 },
-                                        justifyContent: "space-around",
+                                        gap: 1,
+                                        justifyContent: "center",
                                         alignItems: "center",
                                         color: textColor,
+                                        opacity: 0.9
                                     }}
                                 >
-                                    <Typography component="div">
+                                    <Typography component="div" sx={{ fontSize: "0.9rem" }}>
                                         {loading || !weather ? (
                                             <div className="skeleton" style={{ width: "70px", height: "18px" }} />
                                         ) : (
-                                            `${t("min")}: ${i18n.language === "ar" ? toArabicNumerals(Math.round(weather.main.temp_min).toString()) : Math.round(weather.main.temp_min).toString()}`
+                                            `${t("min")}: ${i18n.language === "ar" ? toArabicNumerals(Math.round(weather.main.temp_min).toString()) : Math.round(weather.main.temp_min).toString()}°`
                                         )}
                                     </Typography>
-                                    {!loading && weather && <Typography>|</Typography>}
-                                    <Typography component="div">
+                                    {!loading && weather && <Typography sx={{ mx: 0.5 }}>|</Typography>}
+                                    <Typography component="div" sx={{ fontSize: "0.9rem" }}>
                                         {loading || !weather ? (
                                             <div className="skeleton" style={{ width: "70px", height: "18px" }} />
                                         ) : (
-                                            `${t("max")}: ${i18n.language === "ar" ? toArabicNumerals(Math.round(weather.main.temp_max).toString()) : Math.round(weather.main.temp_max).toString()}`
+                                            `${t("max")}: ${i18n.language === "ar" ? toArabicNumerals(Math.round(weather.main.temp_max).toString()) : Math.round(weather.main.temp_max).toString()}°`
                                         )}
                                     </Typography>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    width: "50%",
+                                </Box>
+                            </Box>
+                            <Box
+                                sx={{
+                                    width: { xs: "100%", sm: "40%" },
                                     textAlign: "center",
                                     color: textColor,
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center"
                                 }}
                             >
                                 {loading || !weather ? (
-                                    <CircularProgress size={90} sx={{ marginTop: { xs: 5, sm: 4 }, color: textColor, opacity: 0.6 }} />
+                                    <CircularProgress size={80} sx={{ mt: 2, color: textColor, opacity: 0.6 }} />
                                 ) : (
                                     <CloudIcon
                                         sx={{
-                                            fontSize: { xs: 120, sm: 150, md: 180 },
-                                            marginTop: { xs: 5, sm: 4 },
+                                            fontSize: { xs: 100, sm: 130, md: 160 },
+                                            opacity: 0.9,
+                                            filter: "drop-shadow(0 0 10px rgba(255,255,255,0.2))"
                                         }}
                                     />
                                 )}
-                            </div>
-                        </div>
+                            </Box>
+                        </Box>
                     </>
                 )}
             </CardContent>
